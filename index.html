@@ -250,6 +250,35 @@
     toggleEtut(); // Etüt başlat veya bitir
   }
 });
+    let wakeLock = null;
+
+async function ekranAcikTut() {
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    console.log("Ekran açık tutuluyor.");
+    wakeLock.addEventListener('release', () => {
+      console.log('Ekran kilidi bırakıldı.');
+    });
+  } catch (err) {
+    console.error(`${err.name}, ${err.message}`);
+  }
+}
+
+// Sayfa yüklendiğinde ekran açık tutma fonksiyonu çağrılır
+document.addEventListener("DOMContentLoaded", () => {
+  if ('wakeLock' in navigator) {
+    ekranAcikTut();
+
+    // Sayfa görünürlüğü değiştiğinde tekrar aktif et
+    document.addEventListener('visibilitychange', () => {
+      if (wakeLock !== null && document.visibilityState === 'visible') {
+        ekranAcikTut();
+      }
+    });
+  } else {
+    console.warn("Wake Lock API tarayıcınızda desteklenmiyor.");
+  }
+});
   </script>
 </body>
 </html>
