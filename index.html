@@ -236,6 +236,19 @@
       logDetay.style.display = logDetay.style.display === "none" ? "block" : "none";
     }
     guncelleEkran();
+    document.addEventListener("keydown", function(e) {
+  if (e.code === "Space") {
+    e.preventDefault(); // Sayfanın aşağı kaymasını önler
+    if (calisiyor) {
+      durdur();
+    } else {
+      baslat();
+    }
+  } else if (e.code === "Enter") {
+    e.preventDefault(); // Form submit gibi etkileri engeller
+    toggleEtut(); // Etüt başlat veya bitir
+  }
+});
   </script>
 </body>
 </html>
