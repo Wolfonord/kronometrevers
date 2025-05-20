@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cardo&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="favicon.png" />
   <style>
+    /* Mevcut CSS kodları aynı şekilde kalacak */
     body {
       font-family: 'Cardo', serif;
       margin: 0;
@@ -193,6 +194,31 @@
   </div>
 
   <script>
+    // Wake Lock değişkeni
+    let wakeLock = null;
+    
+    async function requestWakeLock() {
+      try {
+        // 'screen' wake lock'u talep et
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Ekran kapanması engellendi');
+        
+        // Wake lock serbest bırakıldığında
+        wakeLock.addEventListener('release', () => {
+          console.log('Wake Lock serbest bırakıldı');
+        });
+      } catch (err) {
+        console.error(`${err.name}, ${err.message}`);
+      }
+    }
+    
+    function releaseWakeLock() {
+      if (wakeLock !== null) {
+        wakeLock.release();
+        wakeLock = null;
+      }
+    }
+
     function createStars() {
       const starsContainer = document.getElementById('stars');
       const starsCount = 400;
@@ -260,6 +286,10 @@
     function baslat() {
       if (!calisiyor) {
         calisiyor = true;
+        // Ekranın kapanmaması için wake lock talep et
+        if ('wakeLock' in navigator) {
+          requestWakeLock();
+        }
         interval = setInterval(() => {
           saniye++;
           if (saniye === 60) { saniye = 0; dakika++; }
@@ -274,8 +304,25 @@
       }
     }
 
-    function durdur() { if (calisiyor) { calisiyor = false; clearInterval(interval); } }
-    function sifirla() { durdur(); saniye = 0; dakika = 0; saat = 0; guncelleEkran(); }
+    function durdur() { 
+      if (calisiyor) { 
+        calisiyor = false; 
+        clearInterval(interval); 
+        // Wake lock'u serbest bırak
+        if ('wakeLock' in navigator) {
+          releaseWakeLock();
+        }
+      } 
+    }
+    
+    function sifirla() { 
+      durdur(); 
+      saniye = 0; 
+      dakika = 0; 
+      saat = 0; 
+      guncelleEkran(); 
+    }
+    
     function toggleEtut() {
       if (!etutAktif) {
         etutAktif = true;
@@ -296,9 +343,18 @@
         etutNumara++;
       }
     }
+    
     function toggleLog() {
       logDetay.style.display = logDetay.style.display === "none" ? "block" : "none";
     }
+    
+    // Sayfa görünür olduğunda wake lock'u yeniden talep et
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible' && calisiyor) {
+        await requestWakeLock();
+      }
+    });
+    
     guncelleEkran();
   </script>
 </body>
