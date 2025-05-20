@@ -162,8 +162,7 @@
     <div class="sure" id="sure">00:00:00</div>
     <div class="etut-sure" id="etutSure">Etüt süresi: 00:00:00</div>
     <div class="butonlar">
-      <button onclick="baslat()">Başlat</button>
-      <button onclick="durdur()">Durdur</button>
+      <button onclick="toggleBaslatDurdur()" id="baslatDurdurBtn">Başlat</button>
       <button onclick="sifirla()">Sıfırla</button>
       <button onclick="toggleEtut()" id="etutBtn">Etüte Başla</button>
       <button onclick="sureEklePanelGoster()">Süre Ekle</button>
@@ -246,6 +245,32 @@
     const etutSureEl = document.getElementById("etutSure");
     const logDetay = document.getElementById("logDetay");
     const etutBtn = document.getElementById("etutBtn");
+    const baslatDurdurBtn = document.getElementById("baslatDurdurBtn");
+
+    // Klavye kısayollarını ekle
+    document.addEventListener('keydown', function(event) {
+      // Space tuşu - Başlat/Durdur
+      if (event.code === 'Space') {
+        event.preventDefault(); // Sayfanın aşağı kaymasını engelle
+        toggleBaslatDurdur();
+      }
+      
+      // Enter tuşu - Etüt başlat/bitir
+      if (event.code === 'Enter') {
+        event.preventDefault();
+        toggleEtut();
+      }
+    });
+
+    function toggleBaslatDurdur() {
+      if (calisiyor) {
+        durdur();
+        baslatDurdurBtn.textContent = "Başlat";
+      } else {
+        baslat();
+        baslatDurdurBtn.textContent = "Durdur";
+      }
+    }
 
     function sureEklePanelGoster() {
       const panel = document.getElementById("sureEklePanel");
@@ -320,7 +345,8 @@
       saniye = 0; 
       dakika = 0; 
       saat = 0; 
-      guncelleEkran(); 
+      guncelleEkran();
+      baslatDurdurBtn.textContent = "Başlat";
     }
     
     function toggleEtut() {
@@ -330,6 +356,7 @@
         etutBaslangic = new Date();
         etutSaniye = 0; etutDakika = 0; etutSaat = 0;
         baslat();
+        baslatDurdurBtn.textContent = "Durdur";
       } else {
         etutAktif = false;
         etutBtn.textContent = "Etüte Başla";
