@@ -236,6 +236,68 @@
     }
     window.onload = createStars;
 
+    // Verileri localStorage'dan yükle
+    function verileriYukle() {
+      const kayitliVeri = localStorage.getItem('kronometreVerileri');
+      if (kayitliVeri) {
+        const veri = JSON.parse(kayitliVeri);
+        
+        // Ana sayaç verileri
+        saniye = veri.saniye || 0;
+        dakika = veri.dakika || 0;
+        saat = veri.saat || 0;
+        
+        // Etüt verileri
+        etutSaniye = veri.etutSaniye || 0;
+        etutDakika = veri.etutDakika || 0;
+        etutSaat = veri.etutSaat || 0;
+        
+        // Durum bilgileri
+        calisiyor = veri.calisiyor || false;
+        etutAktif = veri.etutAktif || false;
+        etutNumara = veri.etutNumara || 1;
+        
+        // Etüt geçmişi
+        if (veri.etutGecmisi && veri.etutGecmisi.length > 0) {
+          logDetay.innerHTML = '';
+          veri.etutGecmisi.forEach(log => {
+            const div = document.createElement("div");
+            div.innerHTML = log;
+            logDetay.appendChild(div);
+          });
+        }
+        
+        // Buton durumlarını güncelle
+        if (calisiyor) {
+          baslatDurdurBtn.textContent = "Durdur";
+          baslat();
+        } else {
+          baslatDurdurBtn.textContent = "Başlat";
+        }
+        
+        etutBtn.textContent = etutAktif ? "Etütü Bitir" : "Etüte Başla";
+        
+        guncelleEkran();
+      }
+    }
+
+    // Verileri localStorage'a kaydet
+    function verileriKaydet() {
+      const veri = {
+        saniye,
+        dakika,
+        saat,
+        etutSaniye,
+        etutDakika,
+        etutSaat,
+        calisiyor,
+        etutAktif,
+        etutNumara,
+        etutGecmisi: Array.from(logDetay.children).map(child => child.innerHTML)
+      };
+      localStorage.setItem('kronometreVerileri', JSON.stringify(veri));
+    }
+
     let saniye = 0, dakika = 0, saat = 0;
     let etutSaniye = 0, etutDakika = 0, etutSaat = 0;
     let calisiyor = false, interval, etutAktif = false, etutNumara = 1;
@@ -246,6 +308,12 @@
     const logDetay = document.getElementById("logDetay");
     const etutBtn = document.getElementById("etutBtn");
     const baslatDurdurBtn = document.getElementById("baslatDurdurBtn");
+
+    // Sayfa yüklendiğinde verileri yükle
+    window.addEventListener('load', verileriYukle);
+
+    // Sayfa kapatılmadan önce verileri kaydet
+    window.addEventListener('beforeunload', verileriKaydet);
 
     // Klavye kısayollarını ekle
     document.addEventListener('keydown', function(event) {
@@ -270,6 +338,7 @@
         baslat();
         baslatDurdurBtn.textContent = "Durdur";
       }
+      verileriKaydet();
     }
 
     function sureEklePanelGoster() {
@@ -298,6 +367,7 @@
 
       guncelleEkran();
       sureEklePanelGoster();
+      verileriKaydet();
     }
 
     function formatla(s) { return s < 10 ? "0" + s : s; }
@@ -325,6 +395,7 @@
             if (etutDakika === 60) { etutDakika = 0; etutSaat++; }
           }
           guncelleEkran();
+          verileriKaydet(); // Her saniye verileri kaydet
         }, 1000);
       }
     }
@@ -337,6 +408,7 @@
         if ('wakeLock' in navigator) {
           releaseWakeLock();
         }
+        verileriKaydet();
       } 
     }
     
@@ -345,8 +417,16 @@
       saniye = 0; 
       dakika = 0; 
       saat = 0; 
+      etutSaniye = 0;
+      etutDakika = 0;
+      etutSaat = 0;
+      etutAktif = false;
+      etutNumara = 1;
+      logDetay.innerHTML = '';
       guncelleEkran();
       baslatDurdurBtn.textContent = "Başlat";
+      etutBtn.textContent = "Etüte Başla";
+      verileriKaydet();
     }
     
     function toggleEtut() {
@@ -369,6 +449,7 @@
         logDetay.appendChild(div);
         etutNumara++;
       }
+      verileriKaydet();
     }
     
     function toggleLog() {
