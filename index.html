@@ -264,6 +264,14 @@
             const div = document.createElement("div");
             div.innerHTML = log;
             logDetay.appendChild(div);
+            // Tüm butonlara tıklama efekti ekle
+document.querySelectorAll('button').forEach(button => {
+  button.addEventListener('click', () => {
+    button.classList.remove('buton-efekti'); // Önce çıkar (hızlı tıklamalarda tekrarlayabilmesi için)
+    void button.offsetWidth; // Zorla yeniden akış (reflow) tetikle
+    button.classList.add('buton-efekti');
+  });
+});
           });
         }
         
@@ -464,6 +472,15 @@
     });
     
     guncelleEkran();
+    .buton-efekti {
+  animation: tiklaEfekti 0.2s ease;
+}
+
+@keyframes tiklaEfekti {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
   </script>
 </body>
 </html>
